@@ -11,7 +11,7 @@ GO
 CREATE TABLE [CTS].[Member] (
   [id] int PRIMARY KEY,
   [name] varchar(20),
-  [age] nvarchar(3),
+  [age] tinyint,
   [contactId] int,
   [createdAt] datetime,
   [createdBy] int,
@@ -22,11 +22,11 @@ GO
 
 CREATE TABLE [CTS].[Contact] (
   [id] int PRIMARY KEY,
-  [phone] nvarchar(15),
-  [addressLineOne] nvarchar(255),
-  [addressLineTwo] nvarchar(255),
+  [phone] varchar(10),
+  [addressLineOne] varchar(100),
+  [addressLineTwo] varchar(100),
   [locationId] int,
-  [email] nvarchar(50),
+  [email] nvarchar(255),
   [createdAt] datetime,
   [createdBy] int,
   [updatedAt] datetime,
@@ -39,7 +39,7 @@ CREATE TABLE [CTS].[Location] (
   [cityId] int,
   [stateId] int,
   [countryId] int,
-  [pincode] nvarchar(10),
+  [pincode] varchar(6),
   [createdAt] datetime,
   [createdBy] int,
   [updatedAt] datetime,
@@ -49,7 +49,7 @@ GO
 
 CREATE TABLE [CTS].[Country] (
   [id] int PRIMARY KEY,
-  [name] nvarchar(50),
+  [name] varchar(10),
   [createdAt] datetime,
   [createdBy] int,
   [updatedAt] datetime,
@@ -60,7 +60,7 @@ GO
 CREATE TABLE [CTS].[State] (
   [id] int PRIMARY KEY,
   [countryId] int,
-  [name] nvarchar(50),
+  [name] nvarchar(255),
   [createdAt] datetime,
   [createdBy] int,
   [updatedAt] datetime,
@@ -71,7 +71,7 @@ GO
 CREATE TABLE [CTS].[City] (
   [id] int PRIMARY KEY,
   [stateId] int,
-  [name] nvarchar(50),
+  [name] varchar(10),
   [createdAt] datetime,
   [createdBy] int,
   [updatedAt] datetime,
@@ -81,7 +81,7 @@ GO
 
 CREATE TABLE [CTS].[MemberRole_m] (
   [id] int PRIMARY KEY,
-  [name] nvarchar(20),
+  [name] varchar(10),
   [createdAt] datetime,
   [createdBy] int,
   [updatedAt] datetime,
@@ -91,7 +91,7 @@ GO
 
 CREATE TABLE [CTS].[Toss_m] (
   [id] int PRIMARY KEY,
-  [name] nvarchar(10),
+  [name] varchar(5),
   [createdAt] datetime,
   [createdBy] int,
   [updatedAt] datetime,
@@ -122,7 +122,7 @@ GO
 
 CREATE TABLE [CTS].[Team] (
   [id] int PRIMARY KEY,
-  [teamName] nvarchar(50),
+  [teamName] varchar(20),
   [clubId] int,
   [establishedDate] date
 )
@@ -130,7 +130,7 @@ GO
 
 CREATE TABLE [CTS].[Club] (
   [id] int PRIMARY KEY,
-  [name] nvarchar(50),
+  [name] varchar(20),
   [createdAt] datetime,
   [createdBy] int,
   [updatedAt] datetime,
@@ -142,7 +142,7 @@ CREATE TABLE [CTS].[TossResults] (
   [matchId] int PRIMARY KEY,
   [tossChoiceId] int,
   [tossWonBy] int,
-  [decision] nvarchar(10),
+  [decision] varchar(10),
   [createdAt] datetime,
   [createdBy] int,
   [updatedAt] datetime,
@@ -152,7 +152,7 @@ GO
 
 CREATE TABLE [CTS].[Stadium] (
   [id] int PRIMARY KEY,
-  [name] nvarchar(50),
+  [name] varchar(50),
   [contactId] int,
   [capacity] int,
   [createdAt] datetime,
@@ -179,18 +179,18 @@ CREATE TABLE [CTS].[MatchSummary] (
 GO
 
 CREATE TABLE [CTS].[Balls] (
-  [id] int PRIMARY KEY,
+  [ballId] int PRIMARY KEY,
+  [ballNumber] int,
   [matchId] int,
   [over] int,
-  [ballNumber] int,
   [run] int,
   [isWide] bool,
   [isNoBall] bool,
   [wicketTypeId] int,
   [innings] int,
-  [strikerId] int,
-  [nonStricker] int,
-  [bowler] nvarchar(255),
+  [striker] int,
+  [nonStriker] int,
+  [bowler] int,
   [createdAt] datetime,
   [createdBy] int,
   [updatedAt] datetime,
@@ -200,11 +200,64 @@ GO
 
 CREATE TABLE [CTS].[WicketsType_m] (
   [id] int PRIMARY KEY,
-  [name] nvarchar(20),
+  [name] varchar(10),
   [createdAt] datetime,
   [createdBy] int,
   [updatedAt] datetime,
   [updatedBy] int
+)
+GO
+
+CREATE TABLE [CTS].[Users] (
+  [id] int PRIMARY KEY,
+  [username] varchar(50),
+  [password] varchar(8),
+  [contactId] int,
+  [userType] int,
+  [isAccountLocked] boolean,
+  [isLoggedIn] boolean,
+  [createdAt] datetime,
+  [createdBy] int,
+  [updatedAt] datetime,
+  [updatedBy] int
+)
+GO
+
+CREATE TABLE [CTS].[UserType_m] (
+  [id] int PRIMARY KEY,
+  [name] varchar(10),
+  [createdAt] datetime,
+  [createdBy] int,
+  [updatedAt] datetime,
+  [updatedBy] int
+)
+GO
+
+CREATE TABLE [CTS].[SessionDetails] (
+  [id] int,
+  [userId] int,
+  [userAgent] varchar(100),
+  [ipAddress] varchar(15),
+  [platform] varchar(10),
+  [jwtCode] varchar(255),
+  [sessionExpiry] int,
+  [loginTime] datetime,
+  [logoutTime] datetime,
+  [createdAt] datetime,
+  [createdBy] int,
+  [updatedAt] datetime,
+  [updatedBy] int
+)
+GO
+
+CREATE TABLE [CTS].[Audit] (
+  [id] int,
+  [userId] int,
+  [jwtCode] varchar(255),
+  [action] varchar(100),
+  [description] varchar(255),
+  [createdAt] datetime,
+  [createdBy] int
 )
 GO
 
@@ -277,11 +330,23 @@ GO
 ALTER TABLE [CTS].[Balls] ADD FOREIGN KEY ([wicketTypeId]) REFERENCES [CTS].[WicketsType_m] ([id])
 GO
 
-ALTER TABLE [CTS].[Balls] ADD FOREIGN KEY ([strickerId]) REFERENCES [CTS].[Member] ([id])
+ALTER TABLE [CTS].[Balls] ADD FOREIGN KEY ([striker]) REFERENCES [CTS].[Member] ([id])
 GO
 
-ALTER TABLE [CTS].[Balls] ADD FOREIGN KEY ([nonStrickerId]) REFERENCES [CTS].[Member] ([id])
+ALTER TABLE [CTS].[Balls] ADD FOREIGN KEY ([nonStriker]) REFERENCES [CTS].[Member] ([id])
 GO
 
-ALTER TABLE [CTS].[Balls] ADD FOREIGN KEY ([bowlerId]) REFERENCES [CTS].[Member] ([id])
+ALTER TABLE [CTS].[Balls] ADD FOREIGN KEY ([bowler]) REFERENCES [CTS].[Member] ([id])
+GO
+
+ALTER TABLE [CTS].[Users] ADD FOREIGN KEY ([contactId]) REFERENCES [CTS].[Contact] ([id])
+GO
+
+ALTER TABLE [CTS].[Users] ADD FOREIGN KEY ([userType]) REFERENCES [CTS].[UserType_m] ([id])
+GO
+
+ALTER TABLE [CTS].[SessionDetails] ADD FOREIGN KEY ([userId]) REFERENCES [CTS].[Users] ([id])
+GO
+
+ALTER TABLE [CTS].[Audit] ADD FOREIGN KEY ([userId]) REFERENCES [CTS].[Users] ([id])
 GO
